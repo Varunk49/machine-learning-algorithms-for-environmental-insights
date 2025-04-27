@@ -1,0 +1,53 @@
+import pandas as pd
+import numpy as np
+
+# Load dataset
+data = pd.read_csv("air_quality.csv")
+
+# Handle missing values
+data.fillna(data.mean(), inplace=True)
+
+# Selecting features and target variable
+features = data[['PM2.5', 'PM10', 'NO2', 'SO2', 'CO', 'O3', 'Temperature', 'Humidity', 'WindSpeed']]
+target = data['AQI']
+
+# Convert to NumPy arrays
+X = features.to_numpy()
+y = target.to_numpy()
+
+# Split data manually (80% train, 20% test)
+split_index = int(0.8 * len(X))
+X_train, X_test = X[:split_index], X[split_index:]
+y_train, y_test = y[:split_index], y[split_index:]
+
+# Implement simple linear regression from scratch
+def linear_regression(X, y, learning_rate=0.01, epochs=1000):
+    m, n = X.shape
+    theta = np.zeros(n)  # Initialize weights
+    bias = 0
+    
+    for _ in range(epochs):
+        predictions = np.dot(X, theta) + bias
+        errors = predictions - y
+
+        # Compute gradients
+        d_theta = (1/m) * np.dot(X.T, errors)
+        d_bias = np.mean(errors)
+
+        # Update weights
+        theta -= learning_rate * d_theta
+        bias -= learning_rate * d_bias
+    
+    return theta, bias
+
+# Train the model
+theta, bias = linear_regression(X_train, y_train)
+
+# Make predictions
+y_pred = np.dot(X_test, theta) + bias
+
+# Calculate Mean Absolute Error
+mae = np.mean(np.abs(y_test - y_pred))
+print(f"Mean Absolute Error: {mae}")
+
+print("Model trained successfully without sklearn!")
